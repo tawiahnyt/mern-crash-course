@@ -1,6 +1,6 @@
 /** @format */
 
-// import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
+import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
@@ -9,112 +9,168 @@ import {
   IconButton,
   Image,
   Input,
-  PopoverArrow,
-  PopoverBody,
-  PopoverCloseTrigger,
-  PopoverContent,
-  PopoverRoot,
-  PopoverTrigger,
-  Stack,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Text,
+  useColorModeValue,
+  useDisclosure,
+  useToast,
+  VStack,
 } from "@chakra-ui/react";
-import { useColorModeValue } from "./ui/color-mode";
-import React, { useState } from "react";
-import { FaEdit } from "react-icons/fa";
-import { AiFillDelete } from "react-icons/ai";
 import { useProductStore } from "../store/product";
-import { toaster } from "../components/ui/toaster";
+import { useState } from "react";
 
 const ProductCard = ({ product }) => {
+  const [updatedProduct, setUpdatedProduct] = useState(product);
+
   const textColor = useColorModeValue("gray.600", "gray.200");
   const bg = useColorModeValue("white", "gray.800");
 
-  const { deleteProduct } = useProductStore();
+  const { deleteProduct, updateProduct } = useProductStore();
+  const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const handleDeleteProduct = async (pid) => {
     const { success, message } = await deleteProduct(pid);
     if (!success) {
-      toaster.error({
-        title: "An error occurred",
+      toast({
+        title: "Error",
         description: message,
         status: "error",
-        duration: 5000,
+        duration: 3000,
         isClosable: true,
       });
     } else {
-      toaster.success({
-        title: "Product deleted",
+      toast({
+        title: "Success",
         description: message,
         status: "success",
-        duration: 5000,
+        duration: 3000,
         isClosable: true,
       });
     }
   };
 
-  const [open, setOpen] = useState(false);
+  const handleUpdateProduct = async (pid, updatedProduct) => {
+    const { success, message } = await updateProduct(pid, updatedProduct);
+    onClose();
+    if (!success) {
+      toast({
+        title: "Error",
+        description: message,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Product updated successfully",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
 
   return (
     <Box
-      shadow={"lg"}
-      rounded={"lg"}
-      overflow={"hidden"}
-      transition={"all 0.3s"}
-      _hover={{ transform: "translateY(-5px", shadow: "xl" }}
+      shadow="lg"
+      rounded="lg"
+      overflow="hidden"
+      transition="all 0.3s"
+      _hover={{ transform: "translateY(-5px)", shadow: "xl" }}
       bg={bg}
     >
       <Image
         src={product.image}
         alt={product.name}
-        h={"auto"}
-        w={"full"}
-        objectFit={"cover"}
+        h={48}
+        w="full"
+        objectFit="cover"
       />
 
       <Box p={4}>
-        <Heading as={"h3"} size={"md"} mb={2}>
+        <Heading as="h3" size="md" mb={2}>
           {product.name}
         </Heading>
 
-        <Text fontWeight={"bold"} fontSize={"xl"} color={textColor} mb={4}>
+        <Text fontWeight="bold" fontSize="xl" color={textColor} mb={4}>
           ${product.price}
         </Text>
 
-        <HStack gap={2}>
-          <IconButton onClick={setOpen} colorPalette={"blue"}>
-            {<FaEdit />}
-          </IconButton>
+        <HStack spacing={2}>
+          <IconButton icon={<EditIcon />} onClick={onOpen} colorScheme="blue" />
           <IconButton
+            icon={<DeleteIcon />}
             onClick={() => handleDeleteProduct(product._id)}
-            colorPalette={"red"}
-          >
-            <AiFillDelete />
-          </IconButton>
+            colorScheme="red"
+          />
         </HStack>
       </Box>
 
-      <PopoverRoot
-        positioning={"z-index: 1000"}
-        autoFocus
-        modal={true}
-        size={"lg"}
-        placement={"center"}
-        open={open}
-        onOpenChange={(e) => setOpen(e.open)}
-      >
-        <PopoverContent>
-          <PopoverArrow />
-          <PopoverBody>
-            <Stack gap="4">
-              <Input placeholder="40px" />
-              <Input placeholder="32px" />
-              <Input placeholder="Start typing..." />
-            </Stack>
-          </PopoverBody>
-          <PopoverCloseTrigger />
-        </PopoverContent>
-      </PopoverRoot>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+
+        <ModalContent>
+          <ModalHeader>Update Product</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={4}>
+              <Input
+                placeholder="Product Name"
+                name="name"
+                value={updatedProduct.name}
+                onChange={(e) =>
+                  setUpdatedProduct({ ...updatedProduct, name: e.target.value })
+                }
+              />
+              <Input
+                placeholder="Price"
+                name="price"
+                type="number"
+                value={updatedProduct.price}
+                onChange={(e) =>
+                  setUpdatedProduct({
+                    ...updatedProduct,
+                    price: e.target.value,
+                  })
+                }
+              />
+              <Input
+                placeholder="Image URL"
+                name="image"
+                value={updatedProduct.image}
+                onChange={(e) =>
+                  setUpdatedProduct({
+                    ...updatedProduct,
+                    image: e.target.value,
+                  })
+                }
+              />
+            </VStack>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              colorScheme="blue"
+              mr={3}
+              onClick={() => handleUpdateProduct(product._id, updatedProduct)}
+            >
+              Update
+            </Button>
+            <Button variant="ghost" onClick={onClose}>
+              Cancel
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };
-
 export default ProductCard;

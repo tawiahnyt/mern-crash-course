@@ -6,12 +6,12 @@ import {
   Container,
   Heading,
   Input,
+  useColorModeValue,
+  useToast,
   VStack,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { useColorModeValue } from "../components/ui/color-mode";
 import { useProductStore } from "../store/product";
-import { toaster } from "../components/ui/toaster";
 
 const CreatePage = () => {
   const [newProduct, setNewProduct] = useState({
@@ -19,48 +19,45 @@ const CreatePage = () => {
     price: "",
     image: "",
   });
-
+  const toast = useToast();
 
   const { createProduct } = useProductStore();
+
   const handleAddProduct = async () => {
     const { success, message } = await createProduct(newProduct);
     if (!success) {
-      toaster.error({
+      toast({
         title: "Error",
         description: message,
-        status: 'error',
-        duration: 5000,
-        isClosable: true
-      })
+        status: "error",
+        isClosable: true,
+      });
     } else {
-      toaster.success({
+      toast({
         title: "Success",
         description: message,
         status: "success",
-        duration: 5000,
         isClosable: true,
       });
-      setNewProduct({ name:"", price:"", image:""})
     }
-    console.log("Success:", success);
-    console.log("Message", message);
+    setNewProduct({ name: "", price: "", image: "" });
   };
 
   return (
-    <Container maxW={"4xl"}>
-      <VStack gap={10}>
-        <Heading as={"h1"} size={"3xl"} textAlign={"center"} mt={10} mb={8}>
+    <Container maxW={"container.sm"}>
+      <VStack spacing={8}>
+        <Heading as={"h1"} size={"2xl"} textAlign={"center"} mb={8}>
           Create New Product
         </Heading>
 
         <Box
           w={"full"}
-          bg={useColorModeValue("white", "gray.700")}
+          bg={useColorModeValue("white", "gray.800")}
           p={6}
           rounded={"lg"}
           shadow={"md"}
         >
-          <VStack gap={4}>
+          <VStack spacing={4}>
             <Input
               placeholder="Product Name"
               name="name"
@@ -86,7 +83,8 @@ const CreatePage = () => {
                 setNewProduct({ ...newProduct, image: e.target.value })
               }
             />
-            <Button colorScheme={"blue"} onClick={handleAddProduct} w={"full"}>
+
+            <Button colorScheme="blue" onClick={handleAddProduct} w="full">
               Add Product
             </Button>
           </VStack>
@@ -95,5 +93,4 @@ const CreatePage = () => {
     </Container>
   );
 };
-
 export default CreatePage;

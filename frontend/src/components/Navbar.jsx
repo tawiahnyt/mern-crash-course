@@ -1,20 +1,24 @@
 /** @format */
 
-import { Button, Container, Flex, HStack, Text } from "@chakra-ui/react";
+import {
+  Button,
+  Container,
+  Flex,
+  HStack,
+  Text,
+  useColorMode,
+} from "@chakra-ui/react";
 import { Link } from "react-router-dom";
-import { CiSquarePlus } from "react-icons/ci";
-import { LuSun } from "react-icons/lu";
+
+import { PlusSquareIcon } from "@chakra-ui/icons";
 import { IoMoon } from "react-icons/io5";
-import { useColorMode } from "./ui/color-mode";
+import { LuSun } from "react-icons/lu";
 
 const Navbar = () => {
   const { colorMode, toggleColorMode } = useColorMode();
 
   return (
-    <Container
-      maxW={"1140px"}
-      px={4}
-    >
+    <Container maxW={"1140px"} px={4}>
       <Flex
         h={16}
         alignItems={"center"}
@@ -25,12 +29,12 @@ const Navbar = () => {
         }}
       >
         <Text
-          textStyle={{ base: "xl", sm: "4xl" }}
+          fontSize={{ base: "22", sm: "28" }}
           fontWeight={"bold"}
           textTransform={"uppercase"}
           textAlign={"center"}
-          bgGradient="linear(to-r, #7928CA, #FF0080)"
-          // bgClip="text"
+          bgGradient={"linear(to-r, cyan.400, blue.500)"}
+          bgClip={"text"}
         >
           <Link to={"/"}>Product Store 🛒</Link>
         </Text>
@@ -38,18 +42,17 @@ const Navbar = () => {
         <HStack spacing={2} alignItems={"center"}>
           <Link to={"/create"}>
             <Button>
-              <CiSquarePlus />
+              <PlusSquareIcon fontSize={20} />
             </Button>
           </Link>
           <Button onClick={toggleColorMode}>
             {colorMode === "light" ?
-              <LuSun size={20} />
-            : <IoMoon size={20} />}
+              <IoMoon />
+            : <LuSun size="20" />}
           </Button>
         </HStack>
       </Flex>
     </Container>
   );
 };
-
 export default Navbar;
